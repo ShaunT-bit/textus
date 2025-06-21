@@ -1,13 +1,12 @@
-use::std::io::{self,Read};
+#![warn(clippy::pedantic)] //this has to be later removed while shipping
+
+mod editor;
+use editor::Editor;
+
 
 
 fn main() {
-    
-    for b in io::stdin().bytes() {
-        let c = b.unwrap() as char;
-        print!("{}", c);
-        if c == 'q' {
-            break;
-        }
-    }
+    let mut editor = Editor::default();
+    editor.run();
 }
+
