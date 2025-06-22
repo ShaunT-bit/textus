@@ -1,4 +1,4 @@
-#![warn(clippy::pedantic)] //this has to be later removed while shipping
+#![warn(clippy::pedantic, clippy::print_stdout)] //this has to be later removed while shipping
 
 mod editor;
 use editor::Editor;
