@@ -1,7 +1,7 @@
 use std::io::Error;
 use core::cmp::min;
 
-use crossterm::event::{read, Event::{self, Key}, KeyEvent, KeyModifiers, KeyEventKind, KeyCode};
+use crossterm::event::{read, Event::{self, Key}, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
 
 
@@ -9,7 +9,8 @@ use crossterm::event::{read, Event::{self, Key}, KeyEvent, KeyModifiers, KeyEven
 
 mod terminal;
 mod view;
-use terminal::{Terminal,Size,Position};
+
+use terminal::{Position, Size, Terminal};
 use view::View;
 
 #[derive(Copy,Clone,Default)]
@@ -21,6 +22,7 @@ struct Location {
 pub struct Editor {
     should_quit: bool,
     location: Location,
+    view: View,
 }
 
 impl Editor {
@@ -120,7 +122,7 @@ impl Editor {
             Terminal::clear_screen()?;
             Terminal::print("GoodBye.\r\n")?;
         } else {
-            View::render()?;
+            self.view.render()?;
             Terminal::move_caret_to(Position {
                 col: self.location.x,
                 row: self.location.y,
