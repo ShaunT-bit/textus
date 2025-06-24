@@ -53,9 +53,7 @@ impl Editor {
         }
     }
 
-    // needless_pass_by_value: Event is not huge, so there is not a
-    // performance overhead in passing by value, and pattern matching in this
-    // function would be needlessly complicated if we pass by reference here.
+
     #[allow(clippy::needless_pass_by_value)]
     fn evaluate_event(&mut self, event: Event) {
         let should_process = match &event {
@@ -65,19 +63,11 @@ impl Editor {
         };
 
         if should_process {
-            match EditorCommand::try_from(event) {
-                Ok(command) => {
-                    if matches!(command, EditorCommand::Quit) {
-                        self.should_quit = true;
-                    } else {
-                        self.view.handle_command(command);
-                    }
-                }
-                Err(err) => {
-                    #[cfg(debug_assertions)]
-                    {
-                        panic!("Could not handle command: {err}");
-                    }
+            if let Ok(command) = EditorCommand::try_from(event) {
+                if matches!(command, EditorCommand::Quit) {
+                    self.should_quit = true;
+                } else {
+                    self.view.handle_command(command);
                 }
             }
         }
