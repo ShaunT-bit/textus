@@ -7,10 +7,20 @@ use std::{
 mod editorcommand;
 mod terminal;
 mod view;
+mod statusbar;
+
 use terminal::Terminal;
 use view::View;
 
 use editorcommand::EditorCommand;
+
+#[derive(Default,Eq,PartialEq,Debug)]
+pub struct DocumentStatus {
+    total_lines:usize,
+    current_line_index:usize,
+    is_modified:bool,
+    file_name:Option<String>,
+}
 
 pub struct Editor {
     should_quit: bool,
