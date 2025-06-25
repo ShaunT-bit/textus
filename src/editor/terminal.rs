@@ -27,7 +27,6 @@ impl Position {
     }
 }
 
-
 pub struct Terminal;
 
 impl Terminal {
@@ -55,7 +54,7 @@ impl Terminal {
     }
 
     pub fn move_caret_to(position: Position) -> Result<(), Error> {
-        // clippy::as_conversions: See doc above
+
         #[allow(clippy::as_conversions, clippy::cast_possible_truncation)]
         Self::queue_command(MoveTo(position.col as u16, position.row as u16))?;
         Ok(())
@@ -87,7 +86,6 @@ impl Terminal {
         Ok(())
     }
 
-    // * A `Size` representing the terminal size. Any coordinate `z` truncated to `usize` if `usize` < `z` < `u16`
     pub fn size() -> Result<Size, Error> {
         let (width_u16, height_u16) = size()?;
 

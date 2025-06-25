@@ -31,12 +31,10 @@ impl View {
             EditorCommand::Move(direction) => self.move_text_location(&direction),
             EditorCommand::Quit => {}
             EditorCommand::Insert(character) => self.insert_char(character),
-        }
-    }
-    pub fn load(&mut self, file_name: &str) {
-        if let Ok(buffer) = Buffer::load(file_name) {
-            self.buffer = buffer;
-            self.needs_redraw = true;
+            EditorCommand::Delete => self.delete(),
+            EditorCommand::Backspace => self.delete_backward(),
+            EditorCommand::Enter => self.insert_newline(),
+            EditorCommand::Save => self.save(),
         }
     }
 
@@ -46,7 +44,34 @@ impl View {
         self.needs_redraw = true;
     }
 
-    //Text editing
+    
+    pub fn load(&mut self, file_name: &str) {
+        if let Ok(buffer) = Buffer::load(file_name) {
+            self.buffer = buffer;
+            self.needs_redraw = true;
+        }
+    }
+
+    fn save(&self) {
+        let _ = self.buffer.save();
+    }
+
+
+    fn insert_newline(&mut self) {
+        self.buffer.insert_newline(self.text_location);
+        self.move_text_location(&Direction::Right);
+        self.needs_redraw = true;
+    }
+    fn delete_backward(&mut self) {
+        if self.text_location.line_index != 0 || self.text_location.grapheme_index != 0 {
+            self.move_text_location(&Direction::Left);
+            self.delete();
+        }
+    }
+    fn delete(&mut self) {
+        self.buffer.delete(self.text_location);
+        self.needs_redraw = true;
+    }
     fn insert_char(&mut self, character: char) {
         let old_len = self
             .buffer
@@ -61,8 +86,8 @@ impl View {
             .map_or(0, Line::grapheme_count);
         let grapheme_delta = new_len.saturating_sub(old_len);
         if grapheme_delta > 0 {
-            //move right for an added grapheme (should be the regular case)
-            self.move_right();
+
+            self.move_text_location(&Direction::Right);
         }
         self.needs_redraw = true;
     }
@@ -77,6 +102,8 @@ impl View {
             return;
         }
 
+        
+        
         #[allow(clippy::integer_division)]
         let vertical_center = height / 3;
         let top = self.scroll_offset.row;
@@ -116,8 +143,6 @@ impl View {
         full_message
     }
 
-
-    // Scrolling
 
     fn scroll_vertically(&mut self, to: usize) {
         let Size { height, .. } = self.size;
@@ -170,13 +195,11 @@ impl View {
         Position { col, row }
     }
 
-    // endregion
 
-    // region: text location movement
 
     fn move_text_location(&mut self, direction: &Direction) {
         let Size { height, .. } = self.size;
-        // The final boundarline checking happens
+
         match direction {
             Direction::Up => self.move_up(1),
             Direction::Down => self.move_down(1),
@@ -218,7 +241,7 @@ impl View {
     fn move_left(&mut self) {
         if self.text_location.grapheme_index > 0 {
             self.text_location.grapheme_index -= 1;
-        } else {
+        } else if self.text_location.line_index > 0 {
             self.move_up(1);
             self.move_to_end_of_line();
         }
@@ -234,7 +257,6 @@ impl View {
             .map_or(0, Line::grapheme_count);
     }
 
-    // Doesn't trigger scrolling.
     fn snap_to_valid_grapheme(&mut self) {
         self.text_location.grapheme_index = self
             .buffer
