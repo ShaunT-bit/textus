@@ -25,3 +25,4 @@ and end in the middle of a line*/ struct f00;
 */
 
 /* you need to highlight this correctly: /*/*// /**//**///*/*/*/*/*/*/**/*/*/*/*/*/*/*/*/*/ struct not_part_of_comment; /* part of a comment */
+
